@@ -1,0 +1,20 @@
+{
+  "name": "wa-bot",
+  "version": "1.0.0",
+  "description": "Wa Bot with adiwajshing module ,coded by me for education ",
+  "main": "app.js",
+  "scripts": {
+    "test": "node app.js"
+  },
+  "author": "Alif Jian",
+  "license": "ISC",
+  "dependencies": {
+    "@adiwajshing/baileys": "^3.5.0",
+    "@ffmpeg-installer/ffmpeg": "^1.0.20",
+    "axios": "^0.21.1",
+    "fluent-ffmpeg": "^2.1.2",
+    "node-fetch": "^2.6.1",
+    "qrcode-terminal": "^0.12.0",
+    "ytdl-core": "^4.8.3"
+  }
+}
