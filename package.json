@@ -4,7 +4,8 @@
   "description": "Wa Bot with adiwajshing module ,coded by me for education ",
   "main": "app.js",
   "scripts": {
-    "test": "node app.js"
+    "test": "node app.js",
+    "start": "node app.js"
   },
   "author": "Alif Jian",
   "license": "ISC",
