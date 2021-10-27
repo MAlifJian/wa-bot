@@ -312,7 +312,7 @@ Ephemeral Message: *${ephemerallMsg}*
                 var gambar = await alf.downloadAndSaveMediaMessage(encmedia, namaGambarIn);
                 var namaGambar = await getRandom('.webp');
                 await alf.sendMessage(pengirim, '⏳Tunggu Sedang Di Proses', extendedText, {quoted : cht});
-                await ffmpeg(`./${namaGambarIn]}`)
+                await ffmpeg(`./${namaGambarIn}`)
                     .input(namaGambarIn)
                     .on('error', err =>{
                         console.log(`Error : ${err}`);
