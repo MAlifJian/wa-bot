@@ -336,7 +336,7 @@ Ephemeral Message: *${ephemerallMsg}*
                         await alf.sendMessage(pengirim, buffGambar, image, {quoted : cht});
                         fs.unlinkSync(namaGambar)
                         fs.unlinkSync(gambar);
-                        )}catch (err){
+                        }catch (err){
                           msg.reply(err)
                         };
                     })
