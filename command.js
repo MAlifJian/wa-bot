@@ -116,21 +116,28 @@ Ephemeral Message: *${ephemerallMsg}*
 │──────Menu───────│
 > *Owner*
 .bc
+
 > *Info Bot*
 .info
 .runtime
 .menu
+
 > *Admin*
-.kick
-.tagall
-.hidetag
-.add
+.kick _[ tag / reply message ]_
+.tagall 
+.hidetag _[ text ]_
+.add _[ tag / reply message ]_
 
 > *Media*
-.sticker
-.toimg
-.ytmp4
-.ytmp3
+.sticker _[ image / reply image ]_
+.toimg  _[ reply sticker]_
+.ytmp4 _[ linkyt ]_
+.ytmp3 _[ linkyt ]_
+
+> *Logo*
+.pornhub _[ text1 | text2 ]_
+.glitch _[ text1 | text2 ]_
+.fancyglow _[ text ]_
 
 > *Menu Ban*
 .ban
@@ -299,9 +306,10 @@ Ephemeral Message: *${ephemerallMsg}*
             break;
             case "stiker":
             case 'sticker':
+                if(!isGroup) return await msg.reply('Hanya Di Group');
                 var encmedia = isQuoted ? JSON.parse(JSON.stringify(cht).replace('quotedM','m')).message.extendedTextMessage.contextInfo : cht;
                 var gambar = await alf.downloadAndSaveMediaMessage(encmedia);
-                var namaGambar = getRandom('.webp');
+                var namaGambar = await getRandom('.webp');
                 await alf.sendMessage(pengirim, '⏳Tunggu Sedang Di Proses', extendedText, {quoted : cht});
                 await ffmpeg(`./${gambar}`)
                     .input(gambar)
@@ -311,8 +319,8 @@ Ephemeral Message: *${ephemerallMsg}*
                     .on('end',async () => {
                         console.log('Selesai Membuat Sticker');
                         await alf.sendMessage(pengirim, fs.readFileSync(namaGambar), sticker, {quoted : cht});
-                        fs.unlinkSync(namaGambar);
-                        fs.unlinkSync(gambar);
+                        await fs.unlinkSync(namaGambar);
+                        await fs.unlinkSync(gambar);
                     })
                     .addOutputOptions([`-vcodec`,`libwebp`,`-vf`,`scale='min(320,iw)':min'(320,ih)':force_original_aspect_ratio=decrease,fps=15, pad=320:320:-1:-1:color=white@0.0, split [a][b]; [a] palettegen=reserve_transparent=on:transparency_color=ffffff [p]; [b][p] paletteuse`])
                     .toFormat('webp')
@@ -320,28 +328,52 @@ Ephemeral Message: *${ephemerallMsg}*
             break;
             case'toimg':
             case 'image':
+                if(!isGroup) return await msg.reply('Hanya Di Group');
                 var encmedia = JSON.parse(JSON.stringify(cht).replace('quotedM','m')).message.extendedTextMessage.contextInfo;
                 var gambar = await alf.downloadAndSaveMediaMessage(encmedia);
-                var namaGambar = await getRandom('.png');
+                var caption = `Ini lord @${sender.replace("@s.whatsapp.net", "")}`
+                var namaGambar = getRandom('.png');
                 await alf.sendMessage(pengirim, '⏳Tunggu Sedang Di Proses', extendedText, {quoted : cht});
                 await ffmpeg(`./${gambar}`)
                     .input(gambar)
                     .on('error', err =>{
                         console.log(`Error : ${err}`);
                     })
-                    .on('end',async () => {
-                        try{
-                        var buffGambar = await fs.readFileSync(namaGambar);
-                        console.log(buffGambar);
-                        await alf.sendMessage(pengirim, buffGambar, image, {quoted : cht});
-                        fs.unlinkSync(namaGambar)
-                        fs.unlinkSync(gambar);
-                        }catch (err){
-                          console.log(err)
-                        };
+                    .on('end',() => {
+                        console.log('Selesai Membuat Gambar');
+                        fs.readFile(namaGambar, function(err,buff){
+                            alf.sendMessage(pengirim, buff, image, {caption, contextInfo : {mentionedJid : [sender]}});
+                            fs.unlinkSync(namaGambar);
+                            fs.unlinkSync(gambar);
+                        })
                     })
                 .output(namaGambar)
-                    .run();
+                .run();
+            break;
+            // Text Pro
+            case 'pornhub':
+                var args = body.slice(8).trim().split("|");
+                await msg.reply(`⏳Tunggu Sedang Di Proses`);
+                var caption = `Ini lord @${sender.replace("@s.whatsapp.net", "")}`
+                var responseUrl = await fetcher(`https://buyutapi.herokuapp.com/textpro/pornhub?text0=${args[0]}&text1=${args[1]}`);
+                var buffer = await getBuffer(responseUrl.url);
+                await msg.custom(buffer, image,{caption, contextInfo : {mentionedJid : [sender]}});
+            break;
+            case 'glitch':
+                var args = body.slice(8).trim().split("|");
+                await msg.reply(`⏳Tunggu Sedang Di Proses`);
+                var caption = `Ini lord @${sender.replace("@s.whatsapp.net", "")}`
+                var responseUrl = await fetcher(`https://buyutapi.herokuapp.com/textpro/glitch?text0=${args[0]}&text1=${args[1]}`);
+                var buffer = await getBuffer(responseUrl.url);
+                await msg.custom(buffer, image,{caption, contextInfo : {mentionedJid : [sender]}});
+            break;
+            case 'fancyglow':
+                var args = body.slice(8).trim();
+                await msg.reply(`⏳Tunggu Sedang Di Proses`);
+                var caption = `Ini lord @${sender.replace("@s.whatsapp.net", "")}`
+                var responseUrl = await fetcher(`https://buyutapi.herokuapp.com/textpro/fancyglow?text0=args`);
+                var buffer = await getBuffer(responseUrl.url);
+                await msg.custom(buffer, image,{caption, contextInfo : {mentionedJid : [sender]}});
             break;
             default:
             break;
