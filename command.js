@@ -308,12 +308,11 @@ Ephemeral Message: *${ephemerallMsg}*
             case 'sticker':
                 if(!isGroup) return await msg.reply('Hanya Di Group');
                 var encmedia = await isQuoted ? JSON.parse(JSON.stringify(cht).replace('quotedM','m')).message.extendedTextMessage.contextInfo : cht;
-                var namaGambarIn = getRandom("in.png")
-                var gambar = await alf.downloadAndSaveMediaMessage(encmedia, namaGambarIn);
+                var gambar = await alf.downloadAndSaveMediaMessage(encmedia, getRandom(""));
                 var namaGambar = await getRandom('.webp');
                 await alf.sendMessage(pengirim, '⏳Tunggu Sedang Di Proses', extendedText, {quoted : cht});
-                await ffmpeg(`./${namaGambarIn}`)
-                    .input(namaGambarIn)
+                await ffmpeg(`./${gambar}`)
+                    .input(gambar)
                     .on('error', err =>{
                         console.log(`Error : ${err}`);
                     })
@@ -321,7 +320,7 @@ Ephemeral Message: *${ephemerallMsg}*
                         console.log('Selesai Membuat Sticker');
                         await alf.sendMessage(pengirim, fs.readFileSync(namaGambar), sticker, {quoted : cht});
                         await fs.unlinkSync(namaGambar);
-                        await fs.unlinkSync(namaGambarIn);
+                        await fs.unlinkSync(gambar);
                     })
                     .addOutputOptions([`-vcodec`,`libwebp`,`-vf`,`scale='min(320,iw)':min'(320,ih)':force_original_aspect_ratio=decrease,fps=15, pad=320:320:-1:-1:color=white@0.0, split [a][b]; [a] palettegen=reserve_transparent=on:transparency_color=ffffff [p]; [b][p] paletteuse`])
                     .toFormat('webp')
@@ -331,7 +330,7 @@ Ephemeral Message: *${ephemerallMsg}*
             case 'image':
                 if(!isGroup) return await msg.reply('Hanya Di Group');
                 var encmedia = await JSON.parse(JSON.stringify(cht).replace('quotedM','m')).message.extendedTextMessage.contextInfo;
-                var gambar = await alf.downloadAndSaveMediaMessage(encmedia);
+                var gambar = await alf.downloadAndSaveMediaMessage(encmedia, getRandom(""));
                 var caption = `Ini lord @${sender.replace("@s.whatsapp.net", "")}`
                 var namaGambar = await getRandom('.png');
                 await alf.sendMessage(pengirim, '⏳Tunggu Sedang Di Proses', extendedText, {quoted : cht});
@@ -340,14 +339,12 @@ Ephemeral Message: *${ephemerallMsg}*
                     .on('error', err =>{
                         console.log(`Error : ${err}`);
                     })
-                    .on('end',() => {
+                    .on('end',async () => {
                         console.log('Selesai Membuat Gambar');
-                        fs.readFile(namaGambar, function(err,buff){
-                            alf.sendMessage(pengirim, buff, image, {caption, contextInfo : {mentionedJid : [sender]}});
-                            fs.unlinkSync(namaGambar);
-                            fs.unlinkSync(gambar);
+                        await alf.sendMessage(pengirim, fs.readFileSync(namaGambar), image, {caption, contextInfo : {mentionedJid : [sender]}});
+                        await fs.unlinkSync(namaGambar);
+                        await fs.unlinkSync(gambar);                    
                         })
-                    })
                 .output(namaGambar)
                 .run();
             break;
