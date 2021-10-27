@@ -322,7 +322,7 @@ Ephemeral Message: *${ephemerallMsg}*
             case 'image':
                 var encmedia = JSON.parse(JSON.stringify(cht).replace('quotedM','m')).message.extendedTextMessage.contextInfo;
                 var gambar = await alf.downloadAndSaveMediaMessage(encmedia);
-                var namaGambar = getRandom('.png');
+                var namaGambar = await getRandom('.png');
                 await alf.sendMessage(pengirim, '⏳Tunggu Sedang Di Proses', extendedText, {quoted : cht});
                 await ffmpeg(`./${gambar}`)
                     .input(gambar)
@@ -332,7 +332,7 @@ Ephemeral Message: *${ephemerallMsg}*
                     .on('end',async () => {
                         try{
                         var buffGambar = await fs.readFileSync(namaGambar);
-                        console.log('Selesai Membuat Gambar');
+                        console.log(buffGambar);
                         await alf.sendMessage(pengirim, buffGambar, image, {quoted : cht});
                         fs.unlinkSync(namaGambar)
                         fs.unlinkSync(gambar);
