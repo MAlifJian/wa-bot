@@ -330,11 +330,15 @@ Ephemeral Message: *${ephemerallMsg}*
                         console.log(`Error : ${err}`);
                     })
                     .on('end',async () => {
+                        try{
                         var buffGambar = await fs.readFileSync(namaGambar);
                         console.log('Selesai Membuat Gambar');
                         await alf.sendMessage(pengirim, buffGambar, image, {quoted : cht});
-                        fs.unlinkSync(namaGambar);
+                        fs.unlinkSync(namaGambar
                         fs.unlinkSync(gambar);
+                        )}catch (err){
+                          msg.reply(err)
+                        };
                     })
                 .output(namaGambar)
                     .run();
