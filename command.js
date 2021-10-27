@@ -337,7 +337,7 @@ Ephemeral Message: *${ephemerallMsg}*
                         fs.unlinkSync(namaGambar)
                         fs.unlinkSync(gambar);
                         }catch (err){
-                          msg.reply(err)
+                          console.log(err)
                         };
                     })
                 .output(namaGambar)
