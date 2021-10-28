@@ -78,6 +78,8 @@ exports.command = async function command(alf,cht,date){
         const isGroup = pengirim.endsWith('@g.us');
         const sender = isGroup ? cht.participant : cht.key.remoteJid;
         const isOwner = (sender === '6289624835956@s.whatsapp.net' || sender === "6285850057390@s.whatsapp.net");
+
+        console.log(sender + pengirim)
         const isBanned = ban.banList.includes(sender);
         if (cht.message.conversation === ".off" && isOwner) {
             statusBot.status = false;
@@ -90,7 +92,6 @@ exports.command = async function command(alf,cht,date){
         if (!statusBot.status) return;
 
         //Declaratioon
-
         let texts,status,members;
 
         const { text, extendedText, contact, location, liveLocation, image, video, sticker, document, audio, product } = MessageType;
@@ -206,7 +207,7 @@ Ephemeral Message: *${ephemerallMsg}*
             //Admin Case
             case 'kick':
                 if(!isGroup ) return;
-                if(!isAdmin || !isOwner){
+                if(!isAdmin && !isOwner){
                     return await msg.reply(`Hanya Untuk Admin`);
                 }
                 var target = isQuoted ? JSON.parse(JSON.stringify(cht).replace('quotedM','m')).message.extendedTextMessage.contextInfo.participant : `${body.slice(7)}@s.whatsapp.net`;
@@ -214,7 +215,7 @@ Ephemeral Message: *${ephemerallMsg}*
             break;
             case 'add':
                 if(!isGroup) return;
-                if(!isAdmin || !isOwner){
+                if(!isAdmin && !isOwner){
                     return await msg.reply(`Hanya Untuk Admin`);
                 }
                 var target = isQuoted ? JSON.parse(JSON.stringify(cht).replace('quotedM','m')).message.extendedTextMessage.contextInfo.participant : `${body.slice(7)}@s.whatsapp.net`;
@@ -334,6 +335,7 @@ Ephemeral Message: *${ephemerallMsg}*
                 var caption = `Ini lord @${sender.replace("@s.whatsapp.net", "")}`
                 var namaGambar = await getRandom('.jpg');
                 await alf.sendMessage(pengirim, '⏳Tunggu Sedang Di Proses', extendedText, {quoted : cht});
+<<<<<<< HEAD
                 exec(`ffmpeg -i ${gambar} ${namaGambar}`, (err) => {
 						fs.unlinkSync(gambar)
 						if (err) return msg.reply(' Gagal, pada saat mengkonversi sticker ke gambar ')
@@ -342,6 +344,26 @@ Ephemeral Message: *${ephemerallMsg}*
 						fs.unlinkSync(namaGambar)
 					})
                 
+=======
+                await ffmpeg(`./${gambar}`)
+                    .input(gambar)
+                    .on('error', err =>{
+                        console.log(`Error : ${err}`);
+                    })
+                    .on('end',async () => {
+                        try{
+                            console.log('Selesai Membuat Gambar');
+                            await alf.sendMessage(pengirim, fs.readFileSync(`./${namaGambar}`), image, {caption, contextInfo : {mentionedJid : [sender]}});
+                            await fs.unlinkSync(namaGambar);
+                            await fs.unlinkSync(gambar); 
+                        }catch(err){
+                            console.log(err)
+                        }
+                                           
+                        })
+                .output(namaGambar)
+                .run();
+>>>>>>> 6509070 (fix image and update fitur)
             break;
             // Text Pro
             case 'pornhub':
