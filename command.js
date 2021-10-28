@@ -334,7 +334,7 @@ Ephemeral Message: *${ephemerallMsg}*
                 var caption = `Ini lord @${sender.replace("@s.whatsapp.net", "")}`
                 var namaGambar = await getRandom('.png');
                 await alf.sendMessage(pengirim, '⏳Tunggu Sedang Di Proses', extendedText, {quoted : cht});
-                await exec(`ffmpeg -i ${gambar} ${namaGambar}`, (err) => {
+                exec(`ffmpeg -i ${gambar} ${namaGambar}`, (err) => {
 						fs.unlinkSync(gambar)
 						if (err) return msg.reply(' Gagal, pada saat mengkonversi sticker ke gambar ')
 						buffer = fs.readFileSync(namaGambar)
