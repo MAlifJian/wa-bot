@@ -334,19 +334,13 @@ Ephemeral Message: *${ephemerallMsg}*
                 var caption = `Ini lord @${sender.replace("@s.whatsapp.net", "")}`
                 var namaGambar = await getRandom('.png');
                 await alf.sendMessage(pengirim, '⏳Tunggu Sedang Di Proses', extendedText, {quoted : cht});
-                await ffmpeg(`./${gambar}`)
-                    .input(gambar)
-                    .on('error', err =>{
-                        console.log(`Error : ${err}`);
-                    })
-                    .on('end',async () => {
-                        console.log('Selesai Membuat Gambar');
-                        await alf.sendMessage(pengirim, fs.readFileSync(namaGambar), image, {caption, contextInfo : {mentionedJid : [sender]}});
-                        await fs.unlinkSync(namaGambar);
-                        await fs.unlinkSync(gambar);                    
-                        })
-                .toFormat('png')
-                .save(namaGambar)
+                await exec(`ffmpeg -i ${gambar} ${namaGambar}`, (err) => {
+						fs.unlinkSync(gambar)
+						if (err) return msg.reply(' Gagal, pada saat mengkonversi sticker ke gambar ')
+						buffer = fs.readFileSync(namaGambar)
+						msg.costum(buffer, image)
+						fs.unlinkSync(namaGambar)
+					})
                 
             break;
             // Text Pro
