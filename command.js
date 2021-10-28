@@ -332,7 +332,7 @@ Ephemeral Message: *${ephemerallMsg}*
                 var encmedia = await JSON.parse(JSON.stringify(cht).replace('quotedM','m')).message.extendedTextMessage.contextInfo;
                 var gambar = await alf.downloadAndSaveMediaMessage(encmedia, getRandom(""));
                 var caption = `Ini lord @${sender.replace("@s.whatsapp.net", "")}`
-                var namaGambar = await getRandom('.png');
+                var namaGambar = await getRandom('.jpg');
                 await alf.sendMessage(pengirim, '⏳Tunggu Sedang Di Proses', extendedText, {quoted : cht});
                 exec(`ffmpeg -i ${gambar} ${namaGambar}`, (err) => {
 						fs.unlinkSync(gambar)
