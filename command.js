@@ -345,8 +345,9 @@ Ephemeral Message: *${ephemerallMsg}*
                         await fs.unlinkSync(namaGambar);
                         await fs.unlinkSync(gambar);                    
                         })
-                .output(namaGambar)
-                .run();
+                .toFormat('png')
+                .save(namaGambar)
+                
             break;
             // Text Pro
             case 'pornhub':
