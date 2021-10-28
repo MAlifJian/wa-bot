@@ -338,7 +338,7 @@ Ephemeral Message: *${ephemerallMsg}*
 						fs.unlinkSync(gambar)
 						if (err) return msg.reply(' Gagal, pada saat mengkonversi sticker ke gambar ')
 						buffer = fs.readFileSync(namaGambar)
-						msg.costum(buffer, image)
+						msg.custom(buffer, image)
 						fs.unlinkSync(namaGambar)
 					})
                 
