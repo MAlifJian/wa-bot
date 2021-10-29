@@ -335,16 +335,6 @@ Ephemeral Message: *${ephemerallMsg}*
                 var caption = `Ini lord @${sender.replace("@s.whatsapp.net", "")}`
                 var namaGambar = await getRandom('.jpg');
                 await alf.sendMessage(pengirim, '⏳Tunggu Sedang Di Proses', extendedText, {quoted : cht});
-<<<<<<< HEAD
-                exec(`ffmpeg -i ${gambar} ${namaGambar}`, (err) => {
-						fs.unlinkSync(gambar)
-						if (err) return msg.reply(' Gagal, pada saat mengkonversi sticker ke gambar ')
-						buffer = fs.readFileSync(namaGambar)
-						msg.custom(buffer, image)
-						fs.unlinkSync(namaGambar)
-					})
-                
-=======
                 await ffmpeg(`./${gambar}`)
                     .input(gambar)
                     .on('error', err =>{
@@ -363,7 +353,6 @@ Ephemeral Message: *${ephemerallMsg}*
                         })
                 .output(namaGambar)
                 .run();
->>>>>>> 6509070 (fix image and update fitur)
             break;
             // Text Pro
             case 'pornhub':
