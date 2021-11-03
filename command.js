@@ -3,6 +3,7 @@ const{MessageType,
     Mimetype,
     MessageOptions} = require("@adiwajshing/baileys")
 // Module
+const crypto = require('crypto')
 const {exec} = require("child_process")
 const fs = require("fs");
 const axios = require('axios');
@@ -14,7 +15,8 @@ ffmpeg.setFfmpegPath(ffmpegPath);
 // Database Config
 let ban = JSON.parse(fs.readFileSync("./dbs/banList.json"));
 const statusBot = JSON.parse(fs.readFileSync("./dbs/status.json"));
-
+let namaFile = 100;
+let {checkData, writeData, showData} = require("./dbs/controller.js");
 //Function Import
 const {fetcher, getBuffer} = require('./lib/fetcher.js')
 const {getRandom} = require('./lib/function.js')
@@ -57,7 +59,7 @@ exports.command = async function command(alf,cht,date){
         if (!cht.hasNewMessage) return;
         let nama = '';
         if (cht.presences) {
-            Object.values(cht.presences).forEach( s => {nama = s.name;console.log(nama)});
+            await Object.values(cht.presences).forEach( s => {nama = s.name;});
         }
         cht = cht.messages.all()[0];
 
@@ -77,6 +79,14 @@ exports.command = async function command(alf,cht,date){
         // Pembagian class nomor pengirim
         const isGroup = pengirim.endsWith('@g.us');
         const sender = isGroup ? cht.participant : cht.key.remoteJid;
+
+        //Pengecekan Register
+        if (await checkData({jid : sender}).status == "403") return;
+
+        // Mengambil data User
+        const dataUser = await showData(sender);
+        // Cek Limit user
+        if (dataUser.limit == 0) return await reply("Limit Anda Habis");
         const isOwner = (sender === '6289624835956@s.whatsapp.net' || sender === "6285850057390@s.whatsapp.net");
 
         console.log(sender + pengirim)
@@ -161,6 +171,19 @@ Ephemeral Message: *${ephemerallMsg}*
         if(isBanned) return;
         switch (command) {
         //About Bot
+            case 'register':
+                let data = {nama,
+                            jid : sender,
+                            namaFile,
+                            id : await crypto.randomBytes(20).toString('hex'),
+                            xp : 0,
+                            coin : 0,
+                            prem : false,
+                            limit : 10,
+                            maxLimit : 10
+                            }
+                writeData(data);
+            break;
             case 'info':
                 texts = 
                 `────────────────────────\nOwner         : Alif Jian\nContact       : wa.me/+6289624835956\nDescription : Hubungi Owner Untuk Menu Baru,Bot Masih Dalam Pengembangan\n\n
@@ -258,11 +281,13 @@ Ephemeral Message: *${ephemerallMsg}*
             case 'ytmp4':
                 try{
                     if(!isGroup) return await msg.reply('Hanya Di Group');
+                    user.limit -= 1;
+                    writeData(user);
                     var url = await `${body.slice(7)}`;
                     var info = await ytdl.getInfo(url);
                     var format = await ytdl.chooseFormat(info.formats, {quality : '18'});
                     var duration = await fancyTimeFormat(info.videoDetails.lengthSeconds);
-                    await msg.reply(`⏳Tunggu Sedang Di Proses`);
+                    await msg.reply(`Anda Menggunakan 1 limit\n⏳Tunggu Sedang Di Proses`);
                     buffer = await getBuffer(format.url);
                     await msg.custom(buffer, video, {quoted : cht,mimetype : 'video/mp4',filename : `${info.videoDetails.title}.mp4`,thumbnail: fs.readFileSync('./thumb.jpeg'),caption : `Title : ${info.videoDetails.title}\n\nChannel: ${info.videoDetails.author.name}\n\nDuration: ${duration}\n\nUploaded: ${info.videoDetails.uploadDate}\n\nDownload Completed ✅`});
                 }catch(err){
@@ -272,12 +297,14 @@ Ephemeral Message: *${ephemerallMsg}*
                 break;
             case 'ytmp3':
                 if(!isGroup) return await msg.reply('Hanya Di Group');
+                user.limit -= 1;
+                writeData(user);
                 var url = await body.slice(7);
                 try{
                     var info = await ytdl.getInfo(url);
                     var format = await ytdl.chooseFormat(info.formats, {quality : '18'});
                     var duration = await fancyTimeFormat(info.videoDetails.lengthSeconds);
-                    await msg.reply('⏳Tunggu Sedang Di Proses');
+                    await msg.reply('Anda Menggunakan 1 limit\n⏳Tunggu Sedang Di Proses');
                     var infomp3 = `Title : ${info.videoDetails.title}\n\nChannel: ${info.videoDetails.author.name}\n\nDuration: ${duration}\n\nUploaded: ${info.videoDetails.uploadDate}\n\n⏳ Mengganti ke MP3`;
                     buffer = await getBuffer(format.url);
                     var namaM4a = await getRandom(".m4a");
@@ -308,10 +335,12 @@ Ephemeral Message: *${ephemerallMsg}*
             case "stiker":
             case 'sticker':
                 if(!isGroup) return await msg.reply('Hanya Di Group');
+                user.limit -= 1;
+                writeData(user);
                 var encmedia = await isQuoted ? JSON.parse(JSON.stringify(cht).replace('quotedM','m')).message.extendedTextMessage.contextInfo : cht;
                 var gambar = await alf.downloadAndSaveMediaMessage(encmedia, getRandom(""));
                 var namaGambar = await getRandom('.webp');
-                await alf.sendMessage(pengirim, '⏳Tunggu Sedang Di Proses', extendedText, {quoted : cht});
+                await alf.sendMessage(pengirim, 'Anda Menggunakan 1 limit\n⏳Tunggu Sedang Di Proses', extendedText, {quoted : cht});
                 await ffmpeg(`./${gambar}`)
                     .input(gambar)
                     .on('error', err =>{
@@ -330,11 +359,13 @@ Ephemeral Message: *${ephemerallMsg}*
             case'toimg':
             case 'image':
                 if(!isGroup) return await msg.reply('Hanya Di Group');
+                user.limit -= 1;
+                writeData(user);
                 var encmedia = await JSON.parse(JSON.stringify(cht).replace('quotedM','m')).message.extendedTextMessage.contextInfo;
                 var gambar = await alf.downloadAndSaveMediaMessage(encmedia, getRandom(""));
                 var caption = `Ini lord @${sender.replace("@s.whatsapp.net", "")}`
                 var namaGambar = await getRandom('.jpg');
-                await alf.sendMessage(pengirim, '⏳Tunggu Sedang Di Proses', extendedText, {quoted : cht});
+                await alf.sendMessage(pengirim, 'Anda Menggunakan 1 limit\n⏳Tunggu Sedang Di Proses', extendedText, {quoted : cht});
                 await ffmpeg(`./${gambar}`)
                     .input(gambar)
                     .on('error', err =>{
@@ -356,24 +387,30 @@ Ephemeral Message: *${ephemerallMsg}*
             break;
             // Text Pro
             case 'pornhub':
+                user.limit -= 1;
+                writeData(user);
                 var args = body.slice(8).trim().split("|");
-                await msg.reply(`⏳Tunggu Sedang Di Proses`);
+                await msg.reply(`Anda Menggunakan 1 limit\n⏳Tunggu Sedang Di Proses`);
                 var caption = `Ini lord @${sender.replace("@s.whatsapp.net", "")}`
                 var responseUrl = await fetcher(`https://buyutapi.herokuapp.com/textpro/pornhub?text0=${args[0]}&text1=${args[1]}`);
                 var buffer = await getBuffer(responseUrl.url);
                 await msg.custom(buffer, image,{caption, contextInfo : {mentionedJid : [sender]}});
             break;
             case 'glitch':
+                user.limit -= 1;
+                writeData(user);
                 var args = body.slice(8).trim().split("|");
-                await msg.reply(`⏳Tunggu Sedang Di Proses`);
+                await msg.reply(`Anda Menggunakan 1 limit\n⏳Tunggu Sedang Di Proses`);
                 var caption = `Ini lord @${sender.replace("@s.whatsapp.net", "")}`
                 var responseUrl = await fetcher(`https://buyutapi.herokuapp.com/textpro/glitch?text0=${args[0]}&text1=${args[1]}`);
                 var buffer = await getBuffer(responseUrl.url);
                 await msg.custom(buffer, image,{caption, contextInfo : {mentionedJid : [sender]}});
             break;
             case 'fancyglow':
+                user.limit -= 1;
+                writeData(user);
                 var args = body.slice(8).trim();
-                await msg.reply(`⏳Tunggu Sedang Di Proses`);
+                await msg.reply(`Anda Menggunakan 1 limit\n⏳Tunggu Sedang Di Proses`);
                 var caption = `Ini lord @${sender.replace("@s.whatsapp.net", "")}`
                 var responseUrl = await fetcher(`https://buyutapi.herokuapp.com/textpro/fancyglow?text0=args`);
                 var buffer = await getBuffer(responseUrl.url);
